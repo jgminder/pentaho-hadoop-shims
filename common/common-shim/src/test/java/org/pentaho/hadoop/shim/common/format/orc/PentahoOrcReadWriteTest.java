@@ -68,7 +68,7 @@ import static org.junit.Assert.assertTrue;
  * Created by tkafalas on 11/3/2017.
  */
 public class PentahoOrcReadWriteTest {
-  private SchemaDescription schemaDescription;
+/*  private SchemaDescription schemaDescription;
   private RowMeta rowMeta;
   private Object[][] rowData;
   private PentahoOrcOutputFormat orcOutputFormat;
@@ -229,11 +229,11 @@ public class PentahoOrcReadWriteTest {
     //testGetSchema();
   }
 
-  /**
+  *//**
    * Write all the rows in the rowData array to an orc file
    *
    * @throws Exception
-   */
+   *//*
   private void testRecordWriter() throws Exception {
     IPentahoOutputFormat.IPentahoRecordWriter orcRecordWriter = orcOutputFormat.createRecordWriter();
     Assert.assertNotNull( orcRecordWriter, "orcRecordWriter should NOT be null!" );
@@ -250,11 +250,11 @@ public class PentahoOrcReadWriteTest {
     }
   }
 
-  /**
+  *//**
    * Read the rows back from Orc file
    *
    * @throws Exception
-   */
+   *//*
   private void testRecordReader() throws Exception {
 
     PluginRegistry.addPluginType( ValueMetaPluginType.getInstance() );
@@ -358,5 +358,5 @@ public class PentahoOrcReadWriteTest {
         return new ValueMetaBinary( fieldName );
     }
     return null;
-  }
+  }*/
 }

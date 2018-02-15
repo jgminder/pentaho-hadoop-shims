@@ -58,9 +58,9 @@ public interface IOrcMetaData {
      * of the orc file.  This method extracts that data, if present, and adds it to a schemaDescription that was built
      * soley by the orc file TypeDescription.
      *
-     * @param schemaDescription Presumeably a schema description built from the typeDescription alone (eg. <code>
+     * @param orcInputFields Presumeably a list of OrcInputFields built from the typeDescription alone (eg. <code>
      *                          OrcSchemaConverter.buildSchemaDescription( TypeDescription ) </code>
      */
-    void read( SchemaDescription schemaDescription );
+    void read( List<? extends IOrcInputField> orcInputFields );
   }
 }
