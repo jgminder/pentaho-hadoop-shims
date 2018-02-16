@@ -113,10 +113,16 @@ public class OrcSchemaConverter {
   private int determineMetaType( TypeDescription subDescription ) {
     switch ( subDescription.getCategory().getName() ) {
       case "string":
+      case "char":
+      case "varchar":
         return ValueMetaInterface.TYPE_STRING;
       case "bigint":
+      case "tinyint":
+      case "smallint":
+      case "int":
         return ValueMetaInterface.TYPE_INTEGER;
       case "double":
+      case "float":
         return ValueMetaInterface.TYPE_NUMBER;
       case "decimal":
         return ValueMetaInterface.TYPE_BIGNUMBER;
@@ -137,8 +143,14 @@ public class OrcSchemaConverter {
     switch ( subDescription.getCategory().getName() ) {
       case "string":
         return OrcSpec.DataType.STRING.getId();
+      case "char":
+        return OrcSpec.DataType.CHAR.getId();
+      case "varchar":
+        return OrcSpec.DataType.VARCHAR.getId();
       case "bigint":
         return OrcSpec.DataType.BIGINT.getId();
+      case "float":
+        return OrcSpec.DataType.FLOAT.getId();
       case "double":
         return OrcSpec.DataType.DOUBLE.getId();
       case "decimal":
@@ -151,6 +163,12 @@ public class OrcSchemaConverter {
         return OrcSpec.DataType.BOOLEAN.getId();
       case "binary":
         return OrcSpec.DataType.BINARY.getId();
+      case "int":
+        return OrcSpec.DataType.INTEGER.getId();
+      case "tinyint":
+        return OrcSpec.DataType.TINYINT.getId();
+      case "smallint":
+        return OrcSpec.DataType.SMALLINT.getId();
     }
     //if none of the cases match return a -1
     return -1;
