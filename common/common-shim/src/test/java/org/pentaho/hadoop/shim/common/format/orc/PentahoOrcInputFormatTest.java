@@ -23,7 +23,11 @@ package org.pentaho.hadoop.shim.common.format.orc;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.pentaho.hadoop.shim.api.format.IOrcInputField;
 import org.pentaho.hadoop.shim.api.format.SchemaDescription;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.Mockito.mock;
 
@@ -32,13 +36,13 @@ import static org.mockito.Mockito.mock;
  */
 public class PentahoOrcInputFormatTest {
   PentahoOrcInputFormat pentahoOrcInputFormat;
-  SchemaDescription mockSchemaDescription;
+  List<IOrcInputField> mockSchemaDescription;
   String fileName = "testFile";
 
   @Before
   public void setup() throws Exception {
     pentahoOrcInputFormat = new PentahoOrcInputFormat();
-    mockSchemaDescription = mock( SchemaDescription.class );
+    mockSchemaDescription = new ArrayList<IOrcInputField>();
   }
 
   @Test( expected = IllegalStateException.class )

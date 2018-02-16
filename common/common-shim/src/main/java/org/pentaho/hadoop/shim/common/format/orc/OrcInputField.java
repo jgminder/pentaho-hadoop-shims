@@ -19,34 +19,37 @@
  * limitations under the License.
  *
  ******************************************************************************/
-package org.pentaho.hadoop.shim.api.format;
 
-import java.util.List;
+package org.pentaho.hadoop.shim.common.format.orc;
 
-public interface IPentahoOrcOutputFormat extends IPentahoOutputFormat {
-  int DEFAULT_COMPRESS_SIZE = 256; // In kilobytes
-  int DEFAULT_STRIPE_SIZE = 64; // In megabytes
-  int DEFAULT_ROW_INDEX_STRIDE = 10000; // In rows
+import org.pentaho.di.core.row.value.ValueMetaFactory;
+import org.pentaho.hadoop.shim.api.format.IOrcInputField;
+import org.pentaho.hadoop.shim.api.format.OrcSpec.DataType;
+import org.pentaho.hadoop.shim.common.format.BaseFormatInputField;
 
-  String STRIPE_SIZE_KEY = "orc.stripe.size";
-  String COMPRESSION_KEY = "orc.compress";
-  String COMPRESS_SIZE_KEY = "orc.compress.size";
-  String ROW_INDEX_STRIDE_KEY = "orc.row.index.stride";
-  String CREATE_INDEX_KEY = "orc.create.index";
-
-  enum COMPRESSION {
-    NONE, SNAPPY, ZLIB, LZO
+/**
+ * @Author tkafalas
+ */
+public class OrcInputField extends BaseFormatInputField implements IOrcInputField {
+  public DataType getOrcType( ) {
+    return DataType.getDataType( getFormatType() );
   }
 
-  void setFields( List<? extends IOrcOutputField> fields ) throws Exception;
+  public void setOrcType( DataType orcType ) {
+    setFormatType( orcType.getId() );
+  }
 
-  void setOutputFile( String file, boolean override ) throws Exception;
+  public void setOrcType( String orcType ) {
+    for ( DataType tmpType : DataType.values() ) {
+      if ( tmpType.getName().equalsIgnoreCase( orcType ) ) {
+        setFormatType( tmpType.getId() );
+        break;
+      }
+    }
+  }
 
-  void setCompression( COMPRESSION compression );
+  public String getTypeDesc() {
+    return ValueMetaFactory.getValueMetaName( getPentahoType() );
+  }
 
-  void setStripeSize( int megabytes );
-
-  void setRowIndexStride( int numRows );
-
-  void setCompressSize( int kilobytes );
 }
