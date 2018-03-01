@@ -73,7 +73,7 @@ import static java.lang.Math.pow;
 
 /**
  * Converter for read/write Hitachi Vantara row from/into Parquet files.
- *
+ * <p>
  * TYPE_DATE and TYPE_TIMESTAMP should be processed via Parquet's TIMESTAMP_MILLIS because Kettle's Date supports time
  * also. TIMESTAMP_MICROS is defined not in all Parquet implementations.
  *
@@ -246,7 +246,8 @@ public class ParquetConverter {
     private final IValueMetaConverter valueMetaConverter = new ValueMetaConverter();
     private static final Logger logger = Logger.getLogger( MyGroupConverter.class );
 
-    private Object convertFromSourceToTargetType( IValueMetaConverter valueMetaConverter, Object stagingValue, IParquetInputField f ) {
+    private Object convertFromSourceToTargetType( IValueMetaConverter valueMetaConverter, Object stagingValue,
+                                                  IParquetInputField f ) {
       try {
         return valueMetaConverter.convertFromSourceToTargetDataType(
           f.getParquetType().getPdiType(), f.getPentahoType(), stagingValue );
@@ -310,13 +311,15 @@ public class ParquetConverter {
               @Override
               public void addDouble( double value ) {
                 current.getData()[ index ] = value;
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
 
               @Override
               public void addFloat( float value ) {
-                current.getData()[ index ] = (double) value;
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] = new BigDecimal( String.valueOf( value ) ).doubleValue();
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
             };
             break;
@@ -325,13 +328,15 @@ public class ParquetConverter {
               @Override
               public void addInt( int value ) {
                 current.getData()[ index ] = (long) value;
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
 
               @Override
               public void addLong( long value ) {
                 current.getData()[ index ] = value;
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
             };
             break;
@@ -340,19 +345,22 @@ public class ParquetConverter {
               @Override
               public void addBinary( Binary value ) {
                 current.getData()[ index ] = binaryToDecimal( value, f.getPrecision(), f.getScale() );
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
 
               @Override
               public void addInt( int value ) {
                 current.getData()[ index ] = new BigDecimal( value );
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
 
               @Override
               public void addLong( long value ) {
                 current.getData()[ index ] = new BigDecimal( value );
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
             };
             break;
@@ -361,7 +369,8 @@ public class ParquetConverter {
               @Override
               public void addBinary( Binary value ) {
                 current.getData()[ index ] = value.toStringUsingUTF8();
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
             };
             break;
@@ -370,7 +379,8 @@ public class ParquetConverter {
               @Override
               public void addBoolean( boolean value ) {
                 current.getData()[ index ] = value;
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
             };
             break;
@@ -379,7 +389,8 @@ public class ParquetConverter {
               @Override
               public void addBinary( Binary value ) {
                 current.getData()[ index ] = value.getBytes();
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
             };
             break;
@@ -388,7 +399,8 @@ public class ParquetConverter {
               @Override
               public void addBinary( Binary value ) {
                 current.getData()[ index ] = value.getBytes();
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
             };
             break;
@@ -397,20 +409,23 @@ public class ParquetConverter {
               @Override
               public void addLong( long value ) {
                 current.getData()[ index ] = new Date( value );
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
 
               // the number of days from the Unix epoch, 1 January 1970.
               @Override
               public void addInt( int value ) {
                 current.getData()[ index ] = new Date( value * 24L * 60L * 60L * 1000L );
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
 
               @Override
               public void addBinary( Binary value ) {
                 current.getData()[ index ] = new Date( dateFromInt96( value ) );
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
             };
             break;
@@ -419,20 +434,23 @@ public class ParquetConverter {
               @Override
               public void addLong( long value ) {
                 current.getData()[ index ] = new Timestamp( value );
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
 
               // the number of days from the Unix epoch, 1 January 1970.
               @Override
               public void addInt( int value ) {
                 current.getData()[ index ] = new Timestamp( value * 24L * 60L * 60L * 1000L );
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
 
               @Override
               public void addBinary( Binary value ) {
                 current.getData()[ index ] = new Timestamp( dateFromInt96( value ) );
-                current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                current.getData()[ index ] =
+                  convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
               }
             };
             break;
@@ -446,7 +464,8 @@ public class ParquetConverter {
                     current.getData()[ index ] = null;
                   } else {
                     current.getData()[ index ] = InetAddress.getByAddress( bytes );
-                    current.getData()[ index ] = convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
+                    current.getData()[ index ] =
+                      convertFromSourceToTargetType( valueMetaConverter, current.getData()[ index ], f );
                   }
                 } catch ( Exception ex ) {
                   throw new RuntimeException( ex );

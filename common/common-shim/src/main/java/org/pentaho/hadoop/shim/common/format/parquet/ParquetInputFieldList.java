@@ -42,7 +42,7 @@ public class ParquetInputFieldList implements Iterable<IParquetInputField> {
   public String marshall() {
     StringBuilder o = new StringBuilder( 2048 );
     for ( IParquetInputField f : fields ) {
-      o.append( f.marshall() ).append( '\n' );
+      o.append( IParquetInputField.marshall( f ) ).append( '\n' );
     }
     return o.toString();
   }

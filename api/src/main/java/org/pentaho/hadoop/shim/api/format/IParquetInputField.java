@@ -28,5 +28,36 @@ public interface IParquetInputField extends IFormatInputField {
 
   ParquetSpec.DataType getParquetType( );
 
-  String marshall();
+  static String marshall( IParquetInputField field ) {
+    StringBuilder sb = new StringBuilder( 256 );
+    sb.append( c( field.getFormatFieldName() ) );
+    sb.append( "|" );
+    sb.append( c( field.getPentahoFieldName() ) );
+    sb.append( "|" );
+    sb.append( Integer.toString( field.getFormatType() ) );
+    sb.append( "|" );
+    sb.append( Integer.toString( field.getPentahoType() ) );
+    sb.append( "|" );
+    sb.append( Integer.toString( field.getPrecision() ) );
+    sb.append( "|" );
+    sb.append( Integer.toString( field.getScale() ) );
+    return sb.toString();
+  }
+
+  static String c( String s ) {
+    if ( s == null ) {
+      return "";
+    }
+    if ( s.contains( "|" ) ) {
+      throw new RuntimeException( "Wrong value: " + s );
+    }
+    return s;
+  }
+
+  static String uc( String s ) {
+    if ( s != null && s.isEmpty() ) {
+      return null;
+    }
+    return s;
+  }
 }

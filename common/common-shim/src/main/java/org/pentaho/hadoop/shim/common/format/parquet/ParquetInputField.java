@@ -36,15 +36,18 @@ public class ParquetInputField extends BaseFormatInputField implements IParquetI
     setPentahoType( pentahoType );
   }
 
+  @Override
   public DataType getParquetType( ) {
     return DataType.getDataType( getFormatType() );
   }
 
-  @Override public void setParquetType( DataType parquetType ) {
+  @Override
+  public void setParquetType( DataType parquetType ) {
     setFormatType( parquetType.getId() );
   }
 
-  @Override public void setParquetType( String parquetType ) {
+  @Override
+  public void setParquetType( String parquetType ) {
     for ( DataType tmpType : DataType.values() ) {
       if ( tmpType.getName().equalsIgnoreCase( parquetType ) ) {
         setFormatType( tmpType.getId() );
@@ -57,21 +60,11 @@ public class ParquetInputField extends BaseFormatInputField implements IParquetI
     return ValueMetaFactory.getValueMetaName( getPentahoType() );
   }
 
-  @Override
-  public String marshall() {
-    StringBuilder sb = new StringBuilder( 256 );
-    sb.append( c( getFormatFieldName() ) );
-    sb.append( "|" );
-    sb.append( c( getPentahoFieldName() ) );
-    sb.append( "|" );
-    sb.append( Integer.toString( getFormatType() ) );
-    sb.append( "|" );
-    sb.append( Integer.toString( getPentahoType() ) );
-    sb.append( "|" );
-    sb.append( Integer.toString( getPrecision() ) );
-    sb.append( "|" );
-    sb.append( Integer.toString( getScale() ) );
-    return sb.toString();
+  private static String uc( String s ) {
+    if ( s != null && s.isEmpty() ) {
+      return null;
+    }
+    return s;
   }
 
   public static IParquetInputField unmarshallField( String str ) {
@@ -98,22 +91,5 @@ public class ParquetInputField extends BaseFormatInputField implements IParquetI
     field.setPrecision( Integer.parseInt( values[ 4 ] ) );
     field.setScale( Integer.parseInt( values[ 5 ] ) );
     return field;
-  }
-
-  private static String c( String s ) {
-    if ( s == null ) {
-      return "";
-    }
-    if ( s.contains( "|" ) ) {
-      throw new RuntimeException( "Wrong value: " + s );
-    }
-    return s;
-  }
-
-  private static String uc( String s ) {
-    if ( s != null && s.isEmpty() ) {
-      return null;
-    }
-    return s;
   }
 }
