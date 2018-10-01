@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2018 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -199,11 +199,6 @@ public class AvroNestedReader {
   protected void init() throws KettleException {
     if ( m_schemaToUse != null ) {
       initTopLevelStructure( m_schemaToUse, true );
-      // any fields specified by the user, or do we need to read all leaves
-      // from the schema?
-      if ( m_normalFields == null || m_normalFields.size() == 0 ) {
-        //TODO: Do we need this?          m_normalFields = AvroFieldGetter.getLeafFields( m_schemaToUse );
-      }
     }
 
     if ( m_normalFields == null || m_normalFields.size() == 0 ) {
