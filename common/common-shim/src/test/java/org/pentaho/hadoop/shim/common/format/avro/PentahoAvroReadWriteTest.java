@@ -668,8 +668,9 @@ public class PentahoAvroReadWriteTest {
     String filePath = getFilePath( outputFileName );
 
     testRecordWriter( avroOutputFields, rowMeta, rowData, compressionType, filePath, overwrite );
-    testRecordReader( avroInputFields, avroOutputFields, rowData, filePath, expectedResults );
 
+    RowMeta outputRowMeta = buildRowMeta( inputSchemaDescription );
+    testRecordReader( avroInputFields, rowMeta, avroOutputFields, rowData, filePath, expectedResults );
   }
 
   private void doReadWrite( String[][] schemaDescription, Object[] rowData,
@@ -710,7 +711,7 @@ public class PentahoAvroReadWriteTest {
     }
   }
 
-  private void testRecordReader( List<AvroInputField> avroInputFields, List<AvroOutputField> avroOutputFields,
+  private void testRecordReader( List<AvroInputField> avroInputFields, RowMeta rowMeta, List<AvroOutputField> avroOutputFields,
                                  Object[] origValues, String filePath, Object[] expectedResults ) throws Exception {
 
     PluginRegistry.addPluginType( ValueMetaPluginType.getInstance() );
@@ -719,6 +720,7 @@ public class PentahoAvroReadWriteTest {
     PentahoAvroInputFormat pentahoAvroInputFormat = new PentahoAvroInputFormat();
     pentahoAvroInputFormat.setInputFields( avroInputFields );
     pentahoAvroInputFormat.setInputFile( filePath );
+    pentahoAvroInputFormat.setOutputRowMeta( rowMeta );
     IPentahoInputFormat.IPentahoRecordReader pentahoRecordReader = pentahoAvroInputFormat.createRecordReader( null );
     for ( RowMetaAndData row : pentahoRecordReader ) {
       for ( int colNum = 0; colNum < avroInputFields.size(); colNum++ ) {

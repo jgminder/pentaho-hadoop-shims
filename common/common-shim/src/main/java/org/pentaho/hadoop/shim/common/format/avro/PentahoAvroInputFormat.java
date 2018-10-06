@@ -73,8 +73,8 @@ public class PentahoAvroInputFormat implements IPentahoAvroInputFormat {
       }
     }
     Schema avroSchema = readAvroSchema();
-      return new AvroNestedRecordReader( nestedDfs, avroSchema, getFields(), variableSpace, incomingFields,
-        outputRowMeta, fileName, isDataBinaryEncoded, useFieldAsInputStream );
+    return new AvroNestedRecordReader( nestedDfs, avroSchema, getFields(), variableSpace, incomingFields,
+      outputRowMeta, fileName, isDataBinaryEncoded, useFieldAsInputStream );
 
   }
 

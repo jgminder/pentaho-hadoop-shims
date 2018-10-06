@@ -12,6 +12,7 @@ import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.hadoop.shim.api.format.IAvroInputField;
 import org.pentaho.hadoop.shim.api.format.IPentahoAvroInputFormat;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -56,7 +57,8 @@ public class AvroNestedRecordReader implements IPentahoAvroInputFormat.IPentahoR
           avroNestedReader.m_datumReader = new GenericDatumReader<Object>( avroSchema );
           if ( fileName != null ) {
             FileObject fileObject = KettleVFS.getFileObject( fileName );
-            avroNestedReader.m_decoder = DecoderFactory.get().jsonDecoder( avroSchema, KettleVFS.getInputStream( fileObject ) );
+            avroNestedReader.m_decoder =
+              DecoderFactory.get().jsonDecoder( avroSchema, KettleVFS.getInputStream( fileObject ) );
           }
         }
       }
@@ -96,7 +98,7 @@ public class AvroNestedRecordReader implements IPentahoAvroInputFormat.IPentahoR
 
   private boolean hasExpandedRows() {
     if ( expandedRows != null ) {
-      if( nextExpandedRow < expandedRows.length) {
+      if ( nextExpandedRow < expandedRows.length ) {
         return true;
       } else {
         incomingFields = null;
@@ -138,7 +140,7 @@ public class AvroNestedRecordReader implements IPentahoAvroInputFormat.IPentahoR
         expandedRows = null;
         expandedRows = avroNestedReader.avroObjectToKettle( incomingFields, avroInputStep );
         if ( expandedRows != null ) {
-          nextRow = objectToRowMetaAndData( expandedRows[nextExpandedRow] );
+          nextRow = objectToRowMetaAndData( expandedRows[ nextExpandedRow ] );
         } else {
           return null;
         }
