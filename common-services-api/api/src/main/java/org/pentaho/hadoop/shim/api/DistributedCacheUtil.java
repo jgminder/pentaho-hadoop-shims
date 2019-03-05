@@ -107,4 +107,5 @@ public interface DistributedCacheUtil {
    */
   void addCachedFiles( Configuration conf, FileSystem fs, Path source, Pattern fileNamePattern ) throws IOException;
 
+  void setCachedFilePermissions( FileSystem fs, Path dest, boolean isPublic ) throws IOException;
 }

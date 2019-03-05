@@ -368,6 +368,14 @@ public class DistributedCacheUtilImpl implements org.pentaho.hadoop.shim.api.Dis
     stageForCache( source, fs, dest, overwrite, false );
   }
 
+  public void setCachedFilePermissions(FileSystem fs, Path dest, boolean isPublic) throws IOException {
+    if ( isPublic ) {
+      fs.setPermission( dest, PUBLIC_CACHED_FILE_PERMISSION );
+    } else {
+      fs.setPermission( dest, CACHED_FILE_PERMISSION );
+    }
+  }
+
   /**
    * Stages the source file or folder to a Hadoop file system and sets their permission and replication value
    * appropriately to be used with the Distributed Cache. WARNING: This will delete the contents of dest before staging
@@ -411,11 +419,7 @@ public class DistributedCacheUtilImpl implements org.pentaho.hadoop.shim.api.Dis
       fs.copyFromLocalFile( local, dest );
     }
 
-    if ( isPublic ) {
-      fs.setPermission( dest, PUBLIC_CACHED_FILE_PERMISSION );
-    } else {
-      fs.setPermission( dest, CACHED_FILE_PERMISSION );
-    }
+    setCachedFilePermissions( fs, dest, isPublic );
     fs.setReplication( dest, replication );
   }
 
@@ -701,5 +705,14 @@ public class DistributedCacheUtilImpl implements org.pentaho.hadoop.shim.api.Dis
 
     List<Path> nonLibFiles = findFiles( ShimUtils.asFileSystem( fs ), ShimUtils.asPath( source ), fileNamePattern );
     addCachedFiles( nonLibFiles, ShimUtils.asConfiguration( conf ) );
+  }
+
+  @Override
+  public void setCachedFilePermissions(org.pentaho.hadoop.shim.api.fs.FileSystem fs, org.pentaho.hadoop.shim.api.fs.Path dest, boolean isPublic) throws IOException {
+    try {
+      setCachedFilePermissions( ShimUtils.asFileSystem( fs ), ShimUtils.asPath( dest ), isPublic );
+    } catch ( Exception e ) {
+      throw new IOException( e );
+    }
   }
 }

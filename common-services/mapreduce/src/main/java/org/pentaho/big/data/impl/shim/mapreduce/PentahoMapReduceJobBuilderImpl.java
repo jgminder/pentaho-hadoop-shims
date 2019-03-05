@@ -570,12 +570,14 @@ public class PentahoMapReduceJobBuilderImpl extends MapReduceJobBuilderImpl impl
     localMetaStoreSnapshotDirPath = Files.createTempDirectory( XmlUtil.META_FOLDER_NAME );
     localMetaStoreSnapshotDirObject = KettleVFS.getFileObject( localMetaStoreSnapshotDirPath.toString() );
     hdfsMetaStoreDirForCurrentJobPath = fs.asPath( installPath + XmlUtil.META_FOLDER_NAME );
+    Path nestedMetaStoreDir = fs.asPath( installPath + XmlUtil.META_FOLDER_NAME + File.separator + XmlUtil.META_FOLDER_NAME );
 
     //fill local metastore snapshot by the existing named cluster
     snapshotMetaStore( localMetaStoreSnapshotDirPath.toString() );
 
     hadoopShim.getDistributedCacheUtil().stageForCache( localMetaStoreSnapshotDirObject, fs, hdfsMetaStoreDirForCurrentJobPath, true, true );
     hadoopShim.getDistributedCacheUtil().addCachedFiles( conf, fs, hdfsMetaStoreDirForCurrentJobPath, null );
+    hadoopShim.getDistributedCacheUtil().setCachedFilePermissions( fs, nestedMetaStoreDir, true );
   }
 
   private void snapshotMetaStore( String metaStoreSnapshotDir ) throws Exception {
