@@ -535,6 +535,7 @@ public class PentahoMapReduceJobBuilderImpl extends MapReduceJobBuilderImpl impl
         }
 
         stageMetaStoreForHadoop( conf, fs, installPath );
+        stageHadoopConfigurationFiles( conf, fs, installPath );
 
 //        if ( !hadoopShim.getDistributedCacheUtil().isKettleEnvironmentInstalledAt( fs, kettleEnvInstallDir ) ) {
 //          throw new KettleException( BaseMessages.getString( PKG,
@@ -584,34 +585,27 @@ public class PentahoMapReduceJobBuilderImpl extends MapReduceJobBuilderImpl impl
       FileSystemConfigBuilder nc = KettleVFS.getInstance().getFileSystemManager().getFileSystemConfigBuilder( "hc" );
       Method snapshotMethod = nc.getClass().getMethod( "snapshotNamedClusterToMetaStore", IMetaStore.class );
       snapshotMethod.invoke( nc, snapshot );
-
-      stageConfigurationFiles( metaStoreSnapshotDir );
     } catch ( FileSystemException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e ) {
       e.printStackTrace();
     }
   }
 
-  private void stageConfigurationFiles( String metaStoreSnapshotDir ) {
-    URI configFileLocation = null;
-    File configFileSource = null;
-    boolean stagingExists = true;
-    File configFilesStagingLocation = new File( metaStoreSnapshotDir + File.separator + ShimConfigsLoader.CONFIGS_DIR_PREFIX + File.separator + getConfigId() );
-    ShimConfigsLoader.ClusterConfigNames[] configFilesNames = ShimConfigsLoader.ClusterConfigNames.values();
-    for ( ShimConfigsLoader.ClusterConfigNames configFileName : configFilesNames ) {
+  private void stageHadoopConfigurationFiles( Configuration conf, FileSystem fs, String installPath ) throws Exception {
+    java.nio.file.Path configurationDir = Files.createTempDirectory( "conf" );
+    FileObject configurationDirObject = KettleVFS.getFileObject( configurationDir.toString() );
+    Path hdfsDir = fs.asPath( installPath + "conf" );
+
+    for ( ShimConfigsLoader.ClusterConfigNames configFileName : ShimConfigsLoader.ClusterConfigNames.values() ) {
       try {
-        configFileLocation = ShimConfigsLoader.getURLToResourceFile( configFileName.toString(), getConfigId() ).toURI();
-        configFileSource = new File( configFileLocation );
-        stagingExists = true;
-        if ( !configFilesStagingLocation.exists() ) {
-          stagingExists = configFilesStagingLocation.mkdirs();
-        }
-        if( configFileSource.exists() && stagingExists ) {
-          FileUtils.copyFileToDirectory( configFileSource, configFilesStagingLocation );
-        }
+        URI uri = ShimConfigsLoader.getURLToResourceFile( configFileName.toString(), getConfigId() ).toURI();
+        FileUtils.copyFileToDirectory( new File( uri ), new File( configurationDir.toString() ) );
       } catch ( Exception e ) {
         continue;
       }
     }
+
+    hadoopShim.getDistributedCacheUtil().stageForCache( configurationDirObject, fs, hdfsDir, true, true );
+    hadoopShim.getDistributedCacheUtil().addCachedFiles( conf, fs, hdfsDir, null );
   }
 
   protected void configureVariableSpace( Configuration conf ) {
