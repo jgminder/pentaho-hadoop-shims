@@ -25,7 +25,7 @@ package com.pentaho.big.data.bundles.impl.shim.hbase;
 import com.pentaho.big.data.bundles.impl.shim.hbase.mapping.ColumnFilterFactoryImpl;
 import com.pentaho.big.data.bundles.impl.shim.hbase.mapping.MappingFactoryImpl;
 import com.pentaho.big.data.bundles.impl.shim.hbase.meta.HBaseValueMetaInterfaceFactoryImpl;
-import org.pentaho.di.core.Const;
+import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.hadoop.shim.ConfigurationException;
@@ -63,25 +63,29 @@ public class HBaseServiceImpl implements HBaseService {
                                              LogChannelInterface logChannelInterface ) throws IOException {
     Properties connProps = new Properties();
     String zooKeeperHost = null;
-    String zooKeeperPort  = null;
-    if ( namedCluster != null ) {
-      zooKeeperHost = variableSpace.environmentSubstitute( namedCluster.getZooKeeperHost() );
-      zooKeeperPort = variableSpace.environmentSubstitute( namedCluster.getZooKeeperPort() );
+    String zooKeeperPort = null;
+
+    if (namedCluster != null) {
+      zooKeeperHost = variableSpace.environmentSubstitute(namedCluster.getZooKeeperHost());
+      zooKeeperPort = variableSpace.environmentSubstitute(namedCluster.getZooKeeperPort());
+      connProps.setProperty("named.cluster", namedCluster.getName());
+      if (namedCluster.getConfigId() != null) {
+        connProps.setProperty("named.cluster.config.id", namedCluster.getConfigId());
+      }
     }
-    if ( !Const.isEmpty( zooKeeperHost ) ) {
-      connProps.setProperty( org.pentaho.hbase.shim.spi.HBaseConnection.ZOOKEEPER_QUORUM_KEY, zooKeeperHost );
+    if (!StringUtils.isEmpty(zooKeeperHost)) {
+      connProps.setProperty(org.pentaho.hbase.shim.spi.HBaseConnection.ZOOKEEPER_QUORUM_KEY, zooKeeperHost);
     }
-    if ( !Const.isEmpty( zooKeeperPort ) ) {
-      connProps.setProperty( org.pentaho.hbase.shim.spi.HBaseConnection.ZOOKEEPER_PORT_KEY, zooKeeperPort );
+    if (!StringUtils.isEmpty(zooKeeperPort)) {
+      connProps.setProperty(org.pentaho.hbase.shim.spi.HBaseConnection.ZOOKEEPER_PORT_KEY, zooKeeperPort);
     }
-    if ( !Const.isEmpty( siteConfig ) ) {
-      connProps.setProperty( org.pentaho.hbase.shim.spi.HBaseConnection.SITE_KEY, siteConfig );
+    if (!StringUtils.isEmpty(siteConfig)) {
+      connProps.setProperty(org.pentaho.hbase.shim.spi.HBaseConnection.SITE_KEY, siteConfig);
     }
-    if ( !Const.isEmpty( defaultConfig ) ) {
-      connProps.setProperty( org.pentaho.hbase.shim.spi.HBaseConnection.DEFAULTS_KEY, defaultConfig );
+    if (!StringUtils.isEmpty(defaultConfig)) {
+      connProps.setProperty(org.pentaho.hbase.shim.spi.HBaseConnection.DEFAULTS_KEY, defaultConfig);
     }
-    connProps.setProperty( "named.cluster", namedCluster.getName() );
-    connProps.setProperty( "named.cluster.config.id", namedCluster.getConfigId() );
+
     return new HBaseConnectionImpl( this, hBaseShim, bytesUtil, connProps, logChannelInterface );
   }
 
@@ -98,7 +102,7 @@ public class HBaseServiceImpl implements HBaseService {
   }
 
   @Override public ByteConversionUtil getByteConversionUtil() {
-    return (ByteConversionUtil) new ByteConversionUtilImpl( bytesUtil );
+    return new ByteConversionUtilImpl( bytesUtil );
   }
 
   @Override public ResultFactory getResultFactory() {

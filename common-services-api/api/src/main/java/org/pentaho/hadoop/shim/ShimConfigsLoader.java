@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -27,26 +26,27 @@ public class ShimConfigsLoader {
 
   public static URL getURLToResourceFile( String siteFileName, String additionalPath ) {
     try {
-      if ( additionalPath != null ) {
-        Path currentPath = Paths.get(
-          Const.getKettleDirectory() + File.separator + CONFIGS_DIR_PREFIX + File.separator + additionalPath + File.separator
-            + siteFileName );
+      Path currentPath = Paths.get(
+              Const.getKettleDirectory() + File.separator + CONFIGS_DIR_PREFIX + File.separator + additionalPath + File.separator
+                      + siteFileName );
 
-        if ( Files.exists( currentPath ) ) {
+      if ( additionalPath != null ) {
+        if ( currentPath.toFile().exists() ) {
           return currentPath.toAbsolutePath().toFile().toURI().toURL();
         }
 
         currentPath = Paths.get(
           Const.getUserHomeDirectory() + File.separator + ".pentaho" + File.separator + CONFIGS_DIR_PREFIX + File.separator + additionalPath + File.separator
             + siteFileName );
-        if ( Files.exists( currentPath ) ) {
+        if ( currentPath.toFile().exists() ) {
           return currentPath.toAbsolutePath().toFile().toURI().toURL();
         }
 
+      } else {
+        // Pentaho MapReduce jobs will create a conf directory in the user's home directory.
         currentPath = Paths.get(
-                Const.getUserHomeDirectory() + File.separator + CONFIGS_DIR_PREFIX + File.separator + additionalPath + File.separator
-                        + siteFileName );
-        if ( Files.exists( currentPath ) ) {
+                Const.getUserHomeDirectory() + File.separator + "conf" + File.separator + siteFileName );
+        if ( currentPath.toFile().exists() ) {
           return currentPath.toAbsolutePath().toFile().toURI().toURL();
         }
       }
@@ -69,14 +69,12 @@ public class ShimConfigsLoader {
   public static void addConfigsAsResources( String additionalPath, Consumer<? super URL> configurationConsumer,
                                             ClusterConfigNames... fileNames ) {
     Properties properties = loadConfigProperties( additionalPath );
-    if ( properties != null ) {
       for ( String propertyName : properties.stringPropertyNames() ) {
         if ( propertyName.startsWith( "java.system." ) ) {
           System.setProperty( propertyName.substring( "java.system.".length() ),
               properties.get( propertyName ).toString() );
         }
       }
-    }
 
     addConfigsAsResources( additionalPath, configurationConsumer,
       Arrays.stream( fileNames ).map( ClusterConfigNames::toString ).collect( Collectors.toList() ) );
@@ -124,6 +122,7 @@ public class ShimConfigsLoader {
       this.configName = configName;
     }
 
+    @Override
     public String toString() {
       return this.configName;
     }

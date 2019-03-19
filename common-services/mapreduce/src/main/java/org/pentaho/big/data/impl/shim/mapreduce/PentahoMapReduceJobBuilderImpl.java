@@ -81,6 +81,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -591,9 +592,11 @@ public class PentahoMapReduceJobBuilderImpl extends MapReduceJobBuilderImpl impl
   }
 
   private void stageHadoopConfigurationFiles( Configuration conf, FileSystem fs, String installPath ) throws Exception {
-    java.nio.file.Path configurationDir = Files.createTempDirectory( "conf" );
-    FileObject configurationDirObject = KettleVFS.getFileObject( configurationDir.toString() );
-    Path hdfsDir = fs.asPath( installPath + "conf" );
+    java.nio.file.Path tempDir = Files.createTempDirectory( "conf" );
+
+    // Create a conf directory underneath the temp directory to copy the configuration files to
+    java.nio.file.Path configurationDir = Paths.get( tempDir.toString() + File.separator + "conf" );
+    Files.createDirectory( configurationDir );
 
     for ( ShimConfigsLoader.ClusterConfigNames configFileName : ShimConfigsLoader.ClusterConfigNames.values() ) {
       try {
@@ -604,7 +607,9 @@ public class PentahoMapReduceJobBuilderImpl extends MapReduceJobBuilderImpl impl
       }
     }
 
-    hadoopShim.getDistributedCacheUtil().stageForCache( configurationDirObject, fs, hdfsDir, true, true );
+    Path hdfsDir = fs.asPath( installPath + "conf" );
+    FileObject tempDirObject = KettleVFS.getFileObject( tempDir.toString() );
+    hadoopShim.getDistributedCacheUtil().stageForCache( tempDirObject, fs, hdfsDir, true, true );
     hadoopShim.getDistributedCacheUtil().addCachedFiles( conf, fs, hdfsDir, null );
   }
 
