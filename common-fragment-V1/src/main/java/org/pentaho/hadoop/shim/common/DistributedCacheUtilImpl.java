@@ -22,6 +22,7 @@
 
 package org.pentaho.hadoop.shim.common;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.AllFileSelector;
 import org.apache.commons.vfs2.FileDepthSelector;
@@ -46,12 +47,14 @@ import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.hadoop.shim.ShimRuntimeException;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -178,6 +181,14 @@ public class DistributedCacheUtilImpl implements org.pentaho.hadoop.shim.api.int
     // Delete the lock file now that we're done. It is intentional that we're not doing this in a try/finally. If the
     // staging fails for some reason we require the user to forcibly overwrite the (partial) installation
     fs.delete( lockFile, true );
+  }
+
+  private void stagePentahoHadoopShims( FileSystem fs, Path dest ) throws KettleFileException, IOException {
+    FileObject karafHomeDir = KettleVFS.getFileObject( System.getProperty("karaf.home") + "/system/org/pentaho/hadoop/shims" );
+    Collection<File> files = FileUtils.listFiles( new File( System.getProperty("karaf.home") + "/system/org/pentaho/hadoop/shims"), null , true );
+    for ( File f : files ) {
+      // stageForCache( , fs, new Path( dest, "" ), true, false );
+    }
   }
 
   /**
