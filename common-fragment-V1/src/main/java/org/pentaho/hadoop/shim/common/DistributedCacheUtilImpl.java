@@ -172,6 +172,7 @@ public class DistributedCacheUtilImpl implements org.pentaho.hadoop.shim.api.int
     out.close();
 
     stageForCache( extracted, fs, destination, true, false );
+    stagePentahoHadoopShims( fs, destination );
     stageBigDataPlugin( fs, destination, bigDataPlugin, shimIdentifier );
 
     if ( !Const.isEmpty( additionalPlugins ) ) {
@@ -184,10 +185,19 @@ public class DistributedCacheUtilImpl implements org.pentaho.hadoop.shim.api.int
   }
 
   private void stagePentahoHadoopShims( FileSystem fs, Path dest ) throws KettleFileException, IOException {
-    FileObject karafHomeDir = KettleVFS.getFileObject( System.getProperty("karaf.home") + "/system/org/pentaho/hadoop/shims" );
-    Collection<File> files = FileUtils.listFiles( new File( System.getProperty("karaf.home") + "/system/org/pentaho/hadoop/shims"), null , true );
+    String karafHome = System.getProperty( "karaf.home" );
+    Collection<File> files = FileUtils.listFiles( new File( karafHome + "/system/org/pentaho/hadoop/shims"), null , true );
     for ( File f : files ) {
-      // stageForCache( , fs, new Path( dest, "" ), true, false );
+      String relativePath = f.toString().replace( karafHome + "/", "" );
+      FileObject fileObj = KettleVFS.getFileObject( f.toString() );
+      stageForCache( fileObj , fs, new Path( dest, "system/karaf/" + relativePath ), true, false );
+    }
+
+    files = FileUtils.listFiles( new File( karafHome + "/system/com/pentaho/hadoop/shims"), null , true );
+    for ( File f : files ) {
+      String relativePath = f.toString().replace( karafHome + "/", "" );
+      FileObject fileObj = KettleVFS.getFileObject( f.toString() );
+      stageForCache( fileObj , fs, new Path( dest, "system/karaf/" + relativePath ), true, false );
     }
   }
 
