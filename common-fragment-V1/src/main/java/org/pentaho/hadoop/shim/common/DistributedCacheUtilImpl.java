@@ -22,7 +22,6 @@
 
 package org.pentaho.hadoop.shim.common;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.AllFileSelector;
 import org.apache.commons.vfs2.FileDepthSelector;
@@ -47,17 +46,16 @@ import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.hadoop.shim.ShimRuntimeException;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -115,6 +113,8 @@ public class DistributedCacheUtilImpl implements org.pentaho.hadoop.shim.api.int
    * Prefix for properties we want to omit when copying to the cluster
    */
   private static final String AUTH_PREFIX = "pentaho.authentication";
+  public static final String SYSTEM_KARAF_SYSTEM_ORG_PENTAHO_HADOOP_SHIMS = "system/karaf/system/org/pentaho/hadoop/shims";
+  public static final String SYSTEM_KARAF_SYSTEM_COM_PENTAHO_HADOOP_SHIMS = "system/karaf/system/com/pentaho/hadoop/shims";
 
 
   /**
@@ -172,7 +172,8 @@ public class DistributedCacheUtilImpl implements org.pentaho.hadoop.shim.api.int
     out.close();
 
     stageForCache( extracted, fs, destination, true, false );
-    stagePentahoHadoopShims( fs, destination );
+    java.nio.file.Path kettleHomeDir = Paths.get( System.getProperty("karaf.home") ).getParent().getParent();
+    stagePentahoHadoopShims( fs, destination, kettleHomeDir );
     stageBigDataPlugin( fs, destination, bigDataPlugin, shimIdentifier );
 
     if ( !Const.isEmpty( additionalPlugins ) ) {
@@ -184,21 +185,31 @@ public class DistributedCacheUtilImpl implements org.pentaho.hadoop.shim.api.int
     fs.delete( lockFile, true );
   }
 
-  private void stagePentahoHadoopShims( FileSystem fs, Path dest ) throws KettleFileException, IOException {
-    String karafHome = System.getProperty( "karaf.home" );
-    Collection<File> files = FileUtils.listFiles( new File( karafHome + "/system/org/pentaho/hadoop/shims"), null , true );
-    for ( File f : files ) {
-      String relativePath = f.toString().replace( karafHome + "/", "" );
-      FileObject fileObj = KettleVFS.getFileObject( f.toString() );
-      stageForCache( fileObj , fs, new Path( dest, "system/karaf/" + relativePath ), true, false );
+  private void stagePentahoHadoopShims( FileSystem fs, Path dest, java.nio.file.Path kettleHomeDir ) throws IOException {
+    Map<String, String> files = null;
+    if ( kettleHomeDir.resolve(SYSTEM_KARAF_SYSTEM_ORG_PENTAHO_HADOOP_SHIMS).toFile().exists() ) {
+      files = Files.walk(kettleHomeDir.resolve(SYSTEM_KARAF_SYSTEM_ORG_PENTAHO_HADOOP_SHIMS))
+              .filter(Files::isRegularFile)
+              .collect(Collectors.toMap(x -> x.toString(), x -> x.toString().replace(kettleHomeDir.toString(), "")));
+
     }
 
-    files = FileUtils.listFiles( new File( karafHome + "/system/com/pentaho/hadoop/shims"), null , true );
-    for ( File f : files ) {
-      String relativePath = f.toString().replace( karafHome + "/", "" );
-      FileObject fileObj = KettleVFS.getFileObject( f.toString() );
-      stageForCache( fileObj , fs, new Path( dest, "system/karaf/" + relativePath ), true, false );
+    if ( kettleHomeDir.resolve(SYSTEM_KARAF_SYSTEM_COM_PENTAHO_HADOOP_SHIMS).toFile().exists() ) {
+      files.putAll(
+              Files.walk(kettleHomeDir.resolve(SYSTEM_KARAF_SYSTEM_COM_PENTAHO_HADOOP_SHIMS))
+                      .filter(Files::isRegularFile)
+                      .collect(Collectors.toMap(x -> x.toString(), x -> x.toString().replace(kettleHomeDir.toString(), ""))));
     }
+
+    files.forEach( ( localPath, relativePath ) -> {
+      try {
+        stageForCache( KettleVFS.getFileObject( localPath ), fs, new Path( dest, relativePath ), true, false );
+      } catch (IOException e) {
+        e.printStackTrace();
+      } catch (KettleFileException e) {
+        e.printStackTrace();
+      }
+    });
   }
 
   /**
